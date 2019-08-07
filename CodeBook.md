@@ -26,20 +26,35 @@
 
 ### Describes of the variables:
 **subject_train:** Column "id" is the column of identifiers of the subjects from the train group.
+
 **activity_train:** Column "Activity_label" is the column of activity labels for the train group. It can be 1..6. From activity_labels.txt it is known that 1 means WALKING, 2 means WALKING_UPSTAIRS, ..., 6 means LAYING.
+
 **X_train:** Measurements of different types of accelerates for the train group. Column names: "Measuremet_1", ..., "Measurement_561".
+
 **subject_test:** Column "id" is the column of identifiers of the subjects from the test group.
+
 **activity_test:** Column "Activity_label" is the column of activity labels for the test group. It can be 1..6. From activity_labels.txt it is known that 1 means WALKING, 2 means WALKING_UPSTAIRS, ..., 6 means LAYING.
+
 **X_test:** Measurements of different types of accelerates for the test group. Column names: "Measuremet_1", ..., "Measurement_561".
 **data:** Merged dataset of X_train and X_test.
+
 **activity_labels:** Column names: "label" (can be 1...6) and "Activity" (can be WALKING, WALKING_UPSTAIRS, WALKING_DOWNSTAIRS, SITTING, STANDING, and LAYING).
+
 **result_mean:** The vector of mean of the Measurements of the data frame data.
+
 **result_std:** The vector of standard deviation of the Measurements of the data frame data.
+
 **result:** The merged data frame of result_mean and result_std.
+
 **merged_train_act:** Column names: "Activity_label" (can be 1...6), "Activity" (can be "WALKING", "WALKING_UPSTAIRS",...). Matched the Activity label with the corresponding Activity in the train group.
+
 **merged_train:** Columns names: "id", "Activity", "Measurement_1", ..., "Measurement_561". Merging of the data frames subject_train, merged_train and X_train.
+
 **merged_test_act:** Column names: "Activity_label" (can be 1...6), "Activity" (can be "WALKING", "WALKING_UPSTAIRS",...). Matched the Activity label with the corresponding Activity in the test group.
+
 **merged_test:** Columns names: "id", "Activity", "Measurement_1", ..., "Measurement_561". Merging of the data frames subject_train, merged_train and X_train.
+
 **data2:** Column names: "id", "Activity", "Accelerate". Gathered version of the merged data of merged_train and merged_test. It shows the accelerate of the subject with code "id" during the activity "Activity".
+
 **result2:** Column names: "Activity", "id", "mean". The mean of the accelerate of the subject with code "id" during the activity "Activity".
 
