@@ -8,7 +8,8 @@
 
 
 run_analysis <-function(){
-        subject_train<-read.table("./UCI HAR Dataset/train/subject_train.txt",
+        
+	subject_train<-read.table("./UCI HAR Dataset/train/subject_train.txt",
                                   sep=" ", fill=TRUE,
                                   col.names=c("id"))
         activity_train<-read.table("./UCI HAR Dataset/train/y_train.txt",
