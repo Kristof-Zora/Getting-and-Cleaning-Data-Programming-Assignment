@@ -3,7 +3,7 @@
 ### There exist the required directories and txt files in the working directory.
 
 
-run_analysis <-function(){
+	run_analysis <-function(){
         #including dplyr package
         library(dplyr)
         
@@ -90,7 +90,7 @@ run_analysis <-function(){
         
         #Writing txt file
         write.table(data,file="MeanBySubjAndActivity.txt",row.name=FALSE)
-}
+	}
 
 
 Variables:
