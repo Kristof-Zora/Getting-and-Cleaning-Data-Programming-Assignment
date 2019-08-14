@@ -1,89 +1,88 @@
 run_analysis <-function(){
+        #including dplyr package
+        library(dplyr)
         
-        subject_train<-read.table("./train/subject_train.txt",
-                                  sep=" ", fill=TRUE,
-                                  col.names=c("id"))
-        activity_train<-read.table("./train/y_train.txt",
-                                   sep=" ", fill=TRUE,
-                                   col.names=c("Activity_label"))
-        X_train<-read_file("./train/X_train.txt")
-        X_train<-gsub("  "," ",X_train)
-        write_file(X_train,"./train/X_train_withOneSpace.txt")
-        X_train<-read.table("./train/X_train_withOneSpace.txt",
-                            sep=" ", fill=TRUE) %>%
-                select(-1)
+        #Reading txt file
+        activity_labels<-read.csv2("./activity_labels.txt", sep="",
+                                   header=FALSE,
+                                   col.names=c("label","Activity")) %>%
+                         tbl_df
         
+        #Reading txt file
+        features<-read.csv2("./features.txt", sep="", header=FALSE,
+                            col.names=c("Number","Feature")) %>%
+                tbl_df
         
+        #Changing the name the begin of the columns from tBody... to
+        # timeBody and from fBody... to frequencyBody
+        features$Feature<-gsub("^t","time",features$Feature)
+        features$Feature<-gsub("^f","frequency",features$Feature)
         
+        #Omitting the paranthesis from function names
+        features$Feature<-gsub("\\(\\)", "", features$Feature)
         
+        #Changing the special character "," to the special character "/"
+        features$Feature<-gsub("\\,", "/", features$Feature)
         
-        subject_test<-read.table("./test/subject_test.txt",
-                                  sep=" ", fill=TRUE,
-                                  col.names=c("id"))
-        activity_test<-read.table("./test/y_test.txt",
-                                   sep=" ", fill=TRUE,
-                                   col.names=c("Activity_label"))
-        X_test<-read_file("./test/X_test.txt")
-        X_test<-gsub("  "," ",X_test)
-        write_file(X_test,"./test/X_test_withOneSpace.txt")
-        X_test<-read.table("./test/X_test_withOneSpace.txt",
-                            sep=" ", fill=TRUE, ) %>%
-                select(-1)
+        #There are some same featurename in the "Feature" variable,
+        #therefore I paste to columns "Number" and "Features".
+        #After that, every feature has a unique name.
+        features<-paste(features$Number,features$Feature, sep = "_")
         
+        #Reading txt files 
+        subject_train<-read.csv2("./train/subject_train.txt",
+                                 sep="", header=FALSE,
+                                 col.names=c("id")) %>% tbl_df
+        activity_train<-read.csv2("./train/y_train.txt",
+                                  sep="", header=FALSE,
+                                  col.names=c("Activity_label")) %>%
+                        tbl_df
+        X_train<-read.csv2("./train/X_train.txt", sep="", header=FALSE,
+                           stringsAsFactors=FALSE) %>%
+                 tbl_df
+        #The columns of X_train are the features (the measurements)
+        colnames(X_train)<-features
         
-        for (i in 1:ncol(X_train)){
-                colnames(X_train)[i]<-paste("Measurement_",i,sep="")
-                colnames(X_test)[i]<-paste("Measurement_",i,sep="")
-        }
-        data<-rbind(X_train,X_test)
-        
-        
-        
-        activity_labels<-read.table("./activity_labels.txt",
-                                    sep=" ", fill=TRUE,
-                                    col.names=c("label","Activity"))
-        
-        
-        
-        
-        result_mean<-sapply(data,mean)
-        result_std<-sapply(data,sd)
-        result<-rbind(result_mean,result_std)
-        
-        print("The mean and standard deviation of the first five measurements:")
-        print(result[,1:5])
-        
-        
-        
-        
-        
-        
-        merged_train_act<-merge(activity_train,activity_labels,
-                                by.x="Activity_label",by.y="label",all=TRUE)
-        
-        merged_train<-cbind(subject_train,merged_train_act,X_train) %>%
-                      select(-Activity_label)
-              
+        #Reading txt files
+        subject_test<-read.csv2("./test/subject_test.txt",
+                                 sep="", header=FALSE,
+                                 col.names=c("id")) %>% tbl_df
+        activity_test<-read.csv2("./test/y_test.txt",
+                                  sep="", header=FALSE,
+                                  col.names=c("Activity_label")) %>%
+                       tbl_df
+        X_test<-read.csv2("./test/X_test.txt", sep="", header=FALSE,
+                           stringsAsFactors=FALSE) %>%
+                tbl_df
+        #The columns of X_test are the features (the measurements)
+        colnames(X_test)<-features
         
         
-        merged_test_act<-merge(activity_test,activity_labels,
-                               by.x="Activity_label",by.y="label",all=TRUE)
+
+        #Merging train and test data sets
+        merged_X<-rbind(X_train,X_test) %>%
+                  sapply(as.numeric) %>%
+                  tbl_df
+        merged_activity<-rbind(activity_train,activity_test)
+        merged_subject<-rbind(subject_train,subject_test)
         
-        merged_test<-cbind(subject_test,merged_test_act,X_test) %>%
-                     select(-Activity_label)
+        #After matching, I have a column with observations of the
+        #labels of the activities (WALKING, WALKING_UPSTAIRS,...)
+        matched_activity<-merge(merged_activity,activity_labels,
+                                by.x="Activity_label",by.y="label",all=TRUE) %>%
+                          select(Activity) %>%
+                          tbl_df
         
-                
+        #The columns of measurments, which contains mean or std
+        mean_and_std<-select(merged_X, contains("mean"),
+                             contains("std"))
         
+        #After summarize, I have the mean of the measurements with
+        #mean or std grouped by the subject identities and activities.
+        data<-cbind(merged_subject,matched_activity,mean_and_std) %>%
+              group_by(id,Activity) %>%
+              summarize_all(mean)
         
-        data2<-rbind(merged_train,merged_test) %>%
-              gather("col","Accelerate",-id,-Activity) %>%
-              select(-col) %>%
-              group_by(Activity,id)
-        
-        
-        result2<-summarise(data2, mean=mean(Accelerate)) %>%
-                 arrange(Activity,id)
-        print(result2,n=Inf)
-        
-        write.table(result2,file="result_dataset_of_5th_task.txt",row.name=FALSE)
+        #Writing txt file
+        write.table(data,file="MeanBySubjAndActivity.txt",row.name=FALSE)
 }
